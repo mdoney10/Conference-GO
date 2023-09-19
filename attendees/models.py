@@ -12,12 +12,25 @@ class Attendee(models.Model):
     name = models.CharField(max_length=200)
     company_name = models.CharField(max_length=200, null=True, blank=True)
     created = models.DateTimeField(auto_now_add=True)
-
+    badge = models.OneToOneField(
+        "Badge",
+        related_name="attendee_badge",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
     conference = models.ForeignKey(
         "events.Conference",
         related_name="attendees",
         on_delete=models.CASCADE,
     )
+
+    def create_badge(self):
+        if not self.badge:
+            badge = Badge(attendee=self)
+            badge.save()
+            self.badge = badge
+            self.save()
 
     def __str__(self):
         return self.name
@@ -39,7 +52,7 @@ class Badge(models.Model):
 
     attendee = models.OneToOneField(
         Attendee,
-        related_name="badge",
+        related_name="badge_attendee",
         on_delete=models.CASCADE,
         primary_key=True,
     )
